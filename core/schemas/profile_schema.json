@@ -1,0 +1,124 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "profile",
+  "description": "Channel instance profile v2",
+  "type": "object",
+  "required": [
+    "schema_version", "channel_id", "name", "concept",
+    "platform", "format", "purpose", "lifecycle_state",
+    "automation_depth", "auto_publish", "credentials_ref",
+    "languages", "cadence", "time_budget_min_per_week",
+    "guardrails", "kill_criteria", "required_capabilities"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "type": "integer", "const": 2 },
+    "channel_id": {
+      "type": "string",
+      "pattern": "^CH-[0-9]{3}$",
+      "description": "e.g. CH-001"
+    },
+    "name": { "type": "string", "minLength": 1 },
+    "concept": { "type": "string", "minLength": 1 },
+    "platform": {
+      "type": "string",
+      "enum": ["threads", "youtube", "instagram", "tiktok", "other"]
+    },
+    "format": { "type": "string", "minLength": 1 },
+    "purpose": {
+      "type": "string",
+      "enum": ["funnel", "adsense", "brand", "hobby"]
+    },
+    "lifecycle_state": {
+      "type": "string",
+      "enum": ["proposed", "calibrating", "active", "paused", "winding_down", "archived"]
+    },
+    "automation_depth": {
+      "type": "string",
+      "enum": ["minimal", "assisted", "full"]
+    },
+    "auto_publish": { "type": "boolean" },
+    "credentials_ref": {
+      "type": "string",
+      "description": "secrets/{credentials_ref}.json filename"
+    },
+    "languages": {
+      "type": "object",
+      "required": ["primary", "metadata", "tracks"],
+      "additionalProperties": false,
+      "properties": {
+        "primary": { "type": "string", "minLength": 2 },
+        "metadata": { "type": "string", "minLength": 2 },
+        "tracks": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["lang", "mode"],
+            "additionalProperties": false,
+            "properties": {
+              "lang": { "type": "string", "minLength": 2 },
+              "mode": {
+                "type": "string",
+                "enum": ["native", "subtitle", "dub", "off"]
+              }
+            }
+          }
+        }
+      }
+    },
+    "cadence": {
+      "type": "string",
+      "pattern": "^[0-9]+/week$",
+      "description": "e.g. 3/week"
+    },
+    "time_budget_min_per_week": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "guardrails": {
+      "type": "object",
+      "required": ["forbidden_topics", "ai_disclosure", "rights_check"],
+      "additionalProperties": false,
+      "properties": {
+        "forbidden_topics": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "ai_disclosure": { "type": "boolean" },
+        "rights_check": { "type": "boolean" }
+      }
+    },
+    "breathing_hole": {
+      "type": ["object", "null"],
+      "required": ["rule", "check_id"],
+      "additionalProperties": false,
+      "properties": {
+        "rule": { "type": "string" },
+        "check_id": { "type": "string" }
+      }
+    },
+    "kill_criteria": {
+      "type": "object",
+      "required": ["review_after_days", "conditions"],
+      "additionalProperties": true,
+      "properties": {
+        "review_after_days": { "type": "integer", "minimum": 1 },
+        "conditions": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "note": { "type": "string" }
+      }
+    },
+    "required_capabilities": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "performance_thresholds": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}

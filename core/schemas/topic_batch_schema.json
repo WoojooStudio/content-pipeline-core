@@ -1,0 +1,69 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "topic_batch",
+  "description": "Canonical topic batch — source of truth for Gate0 (topic pick before drafting). The assistant mixes the topics.md pool with new suggestions. Pick results (gate0) are written by apply_topic_picks.",
+  "type": "object",
+  "required": ["schema_version", "topic_batch_id", "channel_id", "generated_at", "revision", "topics"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "topic_batch_id": {
+      "type": "string",
+      "pattern": "^topic-batch-[0-9]{8}-[0-9]{4}$",
+      "description": "e.g. topic-batch-20260724-0900 (creation timestamp)"
+    },
+    "channel_id": { "type": "string", "pattern": "^CH-[0-9]{3}$" },
+    "generated_at": { "type": "string" },
+    "revision": {
+      "type": "string",
+      "description": "Hash of the topics — compared at topic-picks submission to detect staleness. Excludes gate0."
+    },
+    "topics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["uuid", "local_index", "title"],
+        "additionalProperties": false,
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "description": "Immutable topic identifier (local_index is for display; this is the real key)"
+          },
+          "local_index": { "type": "integer", "minimum": 1, "description": "Display number" },
+          "title": { "type": "string", "minLength": 1 },
+          "bucket": {
+            "type": ["string", "null"],
+            "description": "Category bucket. e.g. explainer/tip/Q&A/seasonal"
+          },
+          "rationale": {
+            "type": ["string", "null"],
+            "description": "One line: why this topic"
+          },
+          "kpi_hypothesis": {
+            "type": ["string", "null"],
+            "description": "Target KPI + hypothesis (KPI-first)"
+          },
+          "source": {
+            "type": ["string", "null"],
+            "description": "Pool source tracking. e.g. topics.md#8 | cc-suggested"
+          },
+          "gate0": {
+            "type": ["object", "null"],
+            "description": "null before picking. apply_topic_picks writes the pick result (primary truth). Excluded from the revision hash.",
+            "additionalProperties": false,
+            "properties": {
+              "picked":    { "type": ["boolean", "null"] },
+              "picked_by": { "type": ["string", "null"] },
+              "picked_at": { "type": ["string", "null"] },
+              "brief": {
+                "type": ["string", "null"],
+                "maxLength": 4000,
+                "description": "Human comment — untrusted. Escaped at render time."
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

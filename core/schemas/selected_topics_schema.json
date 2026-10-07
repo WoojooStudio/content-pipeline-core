@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "selected_topics",
+  "description": "Export artifact of topics that passed Gate0 — created by apply_topic_picks, consumed by /draft-batch. Only picked=true topics go on to drafting (keeps drafting cost separate).",
+  "type": "object",
+  "required": ["schema_version", "topic_batch_id", "channel_id", "selected_at", "topics"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "topic_batch_id": { "type": "string", "pattern": "^topic-batch-[0-9]{8}-[0-9]{4}$" },
+    "channel_id": { "type": "string", "pattern": "^CH-[0-9]{3}$" },
+    "selected_at": { "type": "string" },
+    "topics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["topic_uuid", "title", "gate0"],
+        "additionalProperties": false,
+        "properties": {
+          "topic_uuid": { "type": "string" },
+          "title": { "type": "string", "minLength": 1 },
+          "bucket": { "type": ["string", "null"] },
+          "rationale": { "type": ["string", "null"] },
+          "kpi_hypothesis": { "type": ["string", "null"] },
+          "brief": {
+            "type": ["string", "null"],
+            "maxLength": 4000,
+            "description": "Human comment — untrusted. Escaped before being passed into the drafting prompt."
+          },
+          "gate0": {
+            "type": "object",
+            "required": ["picked_by", "picked_at", "topic_batch_id"],
+            "additionalProperties": false,
+            "properties": {
+              "picked_by":      { "type": ["string", "null"] },
+              "picked_at":      { "type": "string" },
+              "topic_batch_id": { "type": "string", "pattern": "^topic-batch-[0-9]{8}-[0-9]{4}$" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

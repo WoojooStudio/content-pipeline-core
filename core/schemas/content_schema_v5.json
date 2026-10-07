@@ -1,0 +1,405 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "content",
+  "description": "Content unit v5 — v4 + gate_record.provenance.approved_by + outputs[].permalink. Fixes Gate2-approved content violating its own schema because two keys the code had written since v4 were not listed (no data model change, additions only). scaffold_cnt writes schema_version 5.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "id",
+    "channel_id",
+    "title",
+    "lifecycle",
+    "gates",
+    "production",
+    "outputs",
+    "jobs"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "const": 5
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^CNT-[0-9]{3}-[0-9]{4}$",
+      "description": "e.g. CNT-001-0001"
+    },
+    "channel_id": {
+      "type": "string",
+      "pattern": "^CH-[0-9]{3}$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "topic_uuid": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Immutable uuid of the Gate0 topic this content came from. Full traceability selected_topics → draft → content."
+    },
+    "scheduled_for": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Publish slot as an ISO 8601 timestamp. Written after gate2_ok. Publish-queue pattern."
+    },
+    "experiment": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "KPI-first experiment metadata. Must be filled before Gate1. Material for pattern learning once n≥30.",
+      "required": [
+        "category",
+        "hook",
+        "format",
+        "cta",
+        "hypothesis",
+        "kpi_target"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "category": {
+          "type": "string",
+          "description": "Content category bucket. e.g. explainer/tip/Q&A/seasonal"
+        },
+        "hook": {
+          "type": "string",
+          "description": "Opening hook strategy"
+        },
+        "format": {
+          "type": "string",
+          "description": "Format. e.g. thread/card/video"
+        },
+        "cta": {
+          "type": "string",
+          "description": "Call to action. e.g. saves/follow/profile_click"
+        },
+        "hypothesis": {
+          "type": "string",
+          "description": "One-line hypothesis: why make this"
+        },
+        "kpi_target": {
+          "type": "string",
+          "description": "Target KPI. e.g. saves/follows/profile_clicks"
+        }
+      }
+    },
+    "lifecycle": {
+      "type": "object",
+      "required": [
+        "drafted_at"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "gate0_pending_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "gate0_ok_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "drafted_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "gate1_pending_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "gate1_ok_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "producing_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "rendering_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "produced_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "gate2_pending_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "gate2_ok_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "publishing_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "published_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "measured_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "rejected_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "failed_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "cancelled_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "gates": {
+      "type": "object",
+      "required": [
+        "g1",
+        "g2"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "g0": {
+          "$ref": "#/definitions/gate_record"
+        },
+        "g1": {
+          "$ref": "#/definitions/gate_record"
+        },
+        "g2": {
+          "$ref": "#/definitions/gate_record"
+        }
+      }
+    },
+    "production": {
+      "type": "object",
+      "required": [
+        "brief",
+        "human_minutes"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "brief": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "draft": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "human_minutes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "fail_reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "outputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "lang",
+          "mode"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "lang": {
+            "type": "string"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "native",
+              "subtitle",
+              "dub"
+            ]
+          },
+          "file": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "platform_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "permalink": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Public URL of the published post — recorded by publisher.service from the adapter's parse_response (listed since v5)."
+          }
+        }
+      }
+    },
+    "jobs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "module",
+          "job_id",
+          "state"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "module": {
+            "type": "string"
+          },
+          "job_id": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "running",
+              "done",
+              "failed"
+            ]
+          },
+          "started_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "finished_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "gate_record": {
+      "type": "object",
+      "required": [
+        "checks",
+        "by",
+        "at"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "checks": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "boolean"
+          }
+        },
+        "by": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "provenance": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "description": "Origin of the gate decision. additionalProperties false blocks forged fields — only keys actually used are listed. batch_id/uuid=Gate1 (batch-apply), topic_batch_id/topic_uuid/picked_by=Gate0, comment_id/author/ts=report_sync comment, approved_by=Gate2 (approve_gate2).",
+          "additionalProperties": false,
+          "properties": {
+            "comment_id": {
+              "type": "string"
+            },
+            "author": {
+              "type": "string"
+            },
+            "ts": {
+              "type": "string"
+            },
+            "batch_id": {
+              "type": "string"
+            },
+            "uuid": {
+              "type": "string"
+            },
+            "topic_batch_id": {
+              "type": "string"
+            },
+            "topic_uuid": {
+              "type": "string"
+            },
+            "picked_by": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "approved_by": {
+              "type": "string",
+              "description": "Gate2 approver — approve_gate2 always records 'human' (listed since v5)."
+            }
+          }
+        }
+      }
+    }
+  }
+}

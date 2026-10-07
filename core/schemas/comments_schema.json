@@ -1,0 +1,91 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "comments event line",
+  "description": "One line of comments.jsonl = one event. Append-only. Records comment/resolution/promotion decisions by humans or the assistant on content drafts. content.json is the truth; this is the discussion log beside it.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "event_id",
+    "event",
+    "comment_id",
+    "at",
+    "author_principal",
+    "target_revision",
+    "client_request_id"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "event_id": {
+      "type": "string",
+      "description": "Unique uuid4 of this event."
+    },
+    "event": {
+      "type": "string",
+      "enum": [
+        "comment.added",
+        "comment.edited",
+        "comment.withdrawn",
+        "resolution.proposed",
+        "resolution.accepted",
+        "resolution.reopened",
+        "promotion.proposed",
+        "promotion.approved",
+        "promotion.rejected"
+      ],
+      "description": "Nine event types. comment.added creates a new comment_id; the rest reference one."
+    },
+    "comment_id": {
+      "type": "string",
+      "description": "Thread identifier uuid4 created by comment.added. Other events reference an existing comment_id."
+    },
+    "at": {
+      "type": "string",
+      "description": "ISO8601 UTC timestamp."
+    },
+    "author_principal": {
+      "type": "string",
+      "description": "Who created the event. human:<session_id> or cc (assistant chat rail only).",
+      "pattern": "^(human:.+|cc)$"
+    },
+    "body": {
+      "type": ["string", "null"],
+      "maxLength": 8000,
+      "description": "Free text — untrusted. Escaped at render/prompt time. null allowed (resolution/promotion events etc.)."
+    },
+    "target_revision": {
+      "type": "string",
+      "description": "draft_sha of the draft this event saw. sha256(production.draft)[:12]."
+    },
+    "result_revision": {
+      "type": ["string", "null"],
+      "description": "draft_sha of the draft after resolution. Required for resolution.accepted, otherwise null."
+    },
+    "job_id": {
+      "type": ["string", "null"],
+      "description": "Related job id (future scope). Always null for now."
+    },
+    "client_request_id": {
+      "type": "string",
+      "description": "Client-generated uuid — idempotency key. Append is skipped when the same id arrives again."
+    },
+    "causation_id": {
+      "type": ["string", "null"],
+      "description": "event_id of the preceding event that caused this one. resolution.* requires the event_id of the comment.added being resolved."
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "event": { "const": "resolution.accepted" } } },
+      "then": { "required": ["causation_id", "result_revision"] }
+    },
+    {
+      "if": { "properties": { "event": { "const": "resolution.proposed" } } },
+      "then": { "required": ["causation_id"] }
+    },
+    {
+      "if": { "properties": { "event": { "const": "resolution.reopened" } } },
+      "then": { "required": ["causation_id"] }
+    }
+  ]
+}

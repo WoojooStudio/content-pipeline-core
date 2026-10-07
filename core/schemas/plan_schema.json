@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "plan",
+  "description": "Per-channel publishing cadence targets. Kept in a separate file so the content.json/profile.json schemas stay clean. Missing means 'no target set' — the file is not required.",
+  "type": "object",
+  "required": ["schema_version"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "weekly_cadence_target": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Target posts per week. null means unset."
+    },
+    "monthly_target": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "maximum": 500,
+      "description": "Target posts per month. null means unset."
+    },
+    "notes": {
+      "type": ["string", "null"],
+      "maxLength": 2000,
+      "description": "Cadence notes (free text)."
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "topic_picks",
+  "description": "Topic picks and briefs downloaded from the review board in the browser. Input to the topic-apply CLI. The topic batch json is the truth — this is the human's Gate0 decision submission.",
+  "type": "object",
+  "required": ["schema_version", "topic_batch_id", "revision", "picks"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "topic_batch_id": { "type": "string", "pattern": "^topic-batch-[0-9]{8}-[0-9]{4}$" },
+    "revision": {
+      "type": "string",
+      "description": "Topic batch revision at submission. Rejected as stale if it differs from the current batch at apply."
+    },
+    "submitted_at": { "type": ["string", "null"] },
+    "picks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["uuid", "picked"],
+        "additionalProperties": false,
+        "properties": {
+          "uuid": { "type": "string" },
+          "picked": { "type": "boolean" },
+          "brief": {
+            "type": ["string", "null"],
+            "maxLength": 4000,
+            "description": "Arbitrary text — untrusted. Escaped at render/prompt time."
+          }
+        }
+      }
+    }
+  }
+}

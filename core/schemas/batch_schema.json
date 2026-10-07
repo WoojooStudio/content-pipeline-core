@@ -1,0 +1,76 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "batch",
+  "description": "Canonical batch of drafts — created by /draft-batch. The md is a human view derived from this json. Source of truth for picks and comments.",
+  "type": "object",
+  "required": ["schema_version", "batch_id", "channel_id", "generated_at", "revision", "drafts"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "type": "integer", "const": 2 },
+    "batch_id": {
+      "type": "string",
+      "pattern": "^batch-[0-9]{8}-[0-9]{4}$",
+      "description": "e.g. batch-20260723-1830 (creation timestamp)"
+    },
+    "channel_id": { "type": "string", "pattern": "^CH-[0-9]{3}$" },
+    "generated_at": { "type": "string" },
+    "revision": {
+      "type": "string",
+      "description": "Hash of the drafts — compared at picks submission to detect staleness"
+    },
+    "drafts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["uuid", "local_index", "title", "body"],
+        "additionalProperties": false,
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "description": "Immutable draft identifier (local_index is for display; this is the real key)"
+          },
+          "local_index": { "type": "integer", "minimum": 1, "description": "Display number" },
+          "title": { "type": "string", "minLength": 1 },
+          "category": { "type": ["string", "null"] },
+          "body": { "type": "string" },
+          "flag": {
+            "type": ["string", "null"],
+            "description": "Pre-check flag emoji + reason (🔴🟡🟢)"
+          },
+          "experiment": {
+            "type": ["object", "null"],
+            "required": ["category", "hook", "format", "cta", "hypothesis", "kpi_target"],
+            "additionalProperties": false,
+            "properties": {
+              "category": { "type": "string" },
+              "hook": { "type": "string" },
+              "format": { "type": "string" },
+              "cta": { "type": "string" },
+              "hypothesis": { "type": "string" },
+              "kpi_target": { "type": "string" }
+            }
+          },
+          "applied_cnt": {
+            "type": ["string", "null"],
+            "pattern": "^CNT-[0-9]{3}-[0-9]{4}$",
+            "description": "CNT ID allocated by apply_picks. If present, already applied → re-runs skip (idempotent). The enforced format stops arbitrary strings faking completion."
+          },
+          "topic_uuid": {
+            "type": ["string", "null"],
+            "description": "Immutable uuid of the Gate0 topic this draft came from. Full traceability selected_topics → draft → content. null if drafted without Gate0."
+          },
+          "gate0": {
+            "type": ["object", "null"],
+            "description": "Gate0 provenance (inherited from selected_topics). Stamped into content.json gates.g0 at scaffold.",
+            "additionalProperties": false,
+            "properties": {
+              "picked_by":      { "type": ["string", "null"] },
+              "picked_at":      { "type": "string" },
+              "topic_batch_id": { "type": "string", "pattern": "^topic-batch-[0-9]{8}-[0-9]{4}$" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "job",
+  "description": "One job in the console job queue. state/console/jobs/<state>/<job_id>.json — per-machine state, not tracked in git.",
+  "type": "object",
+  "required": [
+    "schema_version", "job_id", "type", "args", "requested_by",
+    "created_at", "expires_at", "claimed_by", "claimed_at",
+    "attempt", "max_attempts", "cancel_requested", "result"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "job_id": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "type": {
+      "type": "string",
+      "description": "Allow-listed types only. No job types are defined for gates, publishing, settings or schemas.",
+      "enum": ["draft_batch", "topic_batch", "revise_content", "remix_content"]
+    },
+    "args": {
+      "type": "object",
+      "description": "Per-type arguments. channel_id/content_id only hold values the server joined from an allow list (no free-text parsing).",
+      "additionalProperties": false,
+      "properties": {
+        "channel_id": { "type": "string", "pattern": "^[A-Za-z0-9-]{1,32}$" },
+        "content_id": { "type": ["string", "null"], "pattern": "^CNT-[0-9]{3}-[0-9]{4}$" },
+        "n": { "type": ["integer", "null"], "minimum": 1, "maximum": 20 },
+        "from_selected": { "type": ["string", "null"], "maxLength": 128 },
+        "note": {
+          "type": ["string", "null"],
+          "maxLength": 2000,
+          "description": "Free text — data for the assistant, not commands. Never reinterpret as paths, command lines or template variables."
+        }
+      },
+      "required": ["channel_id"]
+    },
+    "requested_by": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "created_at": { "type": "string" },
+    "expires_at": {
+      "type": "string",
+      "description": "Doubles as a lease — still running past this time means orphaned. The console server alone owns the expired transition."
+    },
+    "claimed_by": { "type": ["string", "null"], "maxLength": 128 },
+    "claimed_at": { "type": ["string", "null"] },
+    "attempt": { "type": "integer", "minimum": 0 },
+    "max_attempts": { "type": "integer", "minimum": 1, "maximum": 10 },
+    "cancel_requested": { "type": "boolean" },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "at", "detail", "artifact_refs"],
+      "properties": {
+        "status": {
+          "type": ["string", "null"],
+          "enum": ["done", "failed", "expired", "cancelled", null]
+        },
+        "at": { "type": ["string", "null"] },
+        "detail": { "type": ["string", "null"], "maxLength": 4000 },
+        "artifact_refs": {
+          "type": "array",
+          "items": { "type": "string", "maxLength": 512 },
+          "maxItems": 200
+        }
+      }
+    }
+  }
+}
